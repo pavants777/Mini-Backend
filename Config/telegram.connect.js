@@ -10,20 +10,25 @@ const apiId = parseInt(process.env.API_ID);
 const apiHash = process.env.API_HASH;
 const phone = process.env.PHONE;
 
-const stringSession = new StringSession("");
+const stringSession = new StringSession(process.env.TELEGRAM_SESSION);
 const client = new TelegramClient(stringSession, apiId, apiHash, {
   connectionRetries: 5,
 });
 
-async function login() {
-    await client.start({
-      phoneNumber: async () => phone,
-      phoneCode: async () => await input.text("Enter the code you received: "),
-      onError: (err) => console.log("Login error:", err),
-    });
-    console.log("✅ Logged in!");
-    console.log("💾 Session:", client.session.save());
-  }
+const login = async () => {
+  console.log("Connecting to Telegram...");
+  await client.start({
+    phoneNumber: async () => phone,
+    phoneCode: async () => await input.text('OTP Code:'),
+    onError: (err) => console.log(err),
+  });
+
+  console.log('Connected to Telegram!');
+  console.log('Your session string:', client.session.save()); 
+};
+
+module.exports = { login };
+
 
   async function sendMessageToPhone(phoneNumber, message, res) {
     try {
