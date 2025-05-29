@@ -27,31 +27,37 @@ router.post('/signup', async (req, res) => {
 });
 
 
-router.get('/validate', tokenMiddelWare , (req,res)=>{
-  res.json({ message: "Access granted",user : req.user});
+router.get('/validate', tokenMiddelWare, (req, res) => {
+  res.json({ message: "Access granted", token: req.token, user: req.user });
 });
+
 
 
 router.post('/signin', async (req, res) => {
   try {
-      const {phoneNumber , password} = req.body;
-      const existingUser = await UserModel.findOne({phoneNumber});
+    const { phoneNumber, password } = req.body;
+    const existingUser = await UserModel.findOne({ phoneNumber });
 
-      if(!existingUser){
-          return res.status(400).json({error : "Account with this Phone Number is invalid"});
-      }
+    if (!existingUser) {
+      return res.status(400).json({ message: "Account with this Phone Number is Not Existing" });
+    }
 
-      if(password != existingUser.password){
-          return res.status(400).json({error : "Password is invalid"});
-      }
-      const secretKey = process.env.JWT_KEY || "PasswordKey";
-      const token = jwt.sign({userId : existingUser._id}, secretKey, {expiresIn : '30d'});
-      const userWithoutPassword = await UserModel.findById(user._id).select("-password");
-      res.status(200).json({ message: "Access granted", token,user : userWithoutPassword });
+    if (password !== existingUser.password) {
+      return res.status(400).json({ message: "Password is invalid" });
+    }
+
+    const secretKey = process.env.JWT_KEY || "PasswordKey";
+    const token = jwt.sign({ userId: existingUser._id }, secretKey, { expiresIn: '30d' });
+
+    const userWithoutPassword = await UserModel.findById(existingUser._id).select("-password");
+
+    res.status(200).json({ message: "Access granted", token, user: userWithoutPassword });
+
   } catch (error) {
-      res.status(500).json({error : error.message});
+    res.status(500).json({ message: error.message });
   }
 });
+
 
 
 module.exports = router;
