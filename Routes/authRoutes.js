@@ -28,6 +28,7 @@ router.post('/signup', async (req, res) => {
 
 
 router.get('/validate', tokenMiddelWare, (req, res) => {
+  console.log(req.token);
   res.json({ message: "Access granted", token: req.token, user: req.user });
 });
 
@@ -39,7 +40,7 @@ router.post('/signin', async (req, res) => {
     const existingUser = await UserModel.findOne({ phoneNumber });
 
     if (!existingUser) {
-      return res.status(400).json({ message: "Account with this Phone Number is Not Existing" });
+      return res.status(400).json({ message: "User Not Found" });
     }
 
     if (password !== existingUser.password) {
