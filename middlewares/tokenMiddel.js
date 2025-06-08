@@ -11,7 +11,7 @@ const tokenMiddelWare = async (req, res, next) => {
 
     const token = authHeader.split(' ')[1];
     const secretKey = process.env.JWT_KEY || 'PasswordKey';
-
+z̄
     const decoded = jwt.verify(token, secretKey);
     const user = await UserModel.findById(decoded.userId).select('-password');
 

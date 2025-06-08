@@ -5,6 +5,7 @@ const OtpModel = require('../Models/otp.Schema');
 const { sendMessageToPhone } = require('../Config/telegram.connect');
 const router = express.Router();
 const tokenMiddelWare = require('../middlewares/tokenBusines');
+const ServiceRequest = require('../Models/serviceSchema')
 
 // ✅ SIGNUP ROUTE
 router.post('/signup', async (req, res) => {
@@ -157,6 +158,32 @@ router.get('/validate', tokenMiddelWare, (req, res) => {
   console.log(req.token);
   res.json({ message: "Access granted", token: req.token, user: req.user });
 });
+
+router.post('/getRequest', async (req, res) => {
+  const { longitude, latitude } = req.body;
+
+  try {
+    const requests = await ServiceRequest.aggregate([
+      {
+        $geoNear: {
+          near: {
+            type: 'Point',
+            coordinates: [longitude, latitude],
+          },
+          distanceField: 'distance',
+          maxDistance: 5000, // 5 km
+          spherical: true,
+          query: { isAccepted: false },
+        },
+      },
+    ]);
+    res.status(200).json(requests);
+  } catch (error) {
+    console.error('Geo query failed:', error);
+    res.status(500).json({ error: 'Failed to get nearby requests' });
+  }
+});
+
 
 
 module.exports = router;
